@@ -1,12 +1,13 @@
 ﻿using Domain.Entities;
 using Domain.Interfaces;
+using MediatR;
 using System;
 using System.Collections.Generic;
 using System.Text;
 
 namespace Application.OrderItems.Commands.CreateOrderItem
 {
-    public class CreateOrderItemCommandHandler
+    public class CreateOrderItemCommandHandler : IRequestHandler<CreateOrderItemCommand>
     {
         private readonly IOrderItemsRepository _orderItemRepository;
 
@@ -15,7 +16,7 @@ namespace Application.OrderItems.Commands.CreateOrderItem
             _orderItemRepository = orderItemRepository;
         }
 
-        public async Task Handle(CreateOrderItemCommand request)
+        public async Task Handle(CreateOrderItemCommand request, CancellationToken cancellationToken)
         {
             //Test validation
             if (request.Quantity <= 0)
@@ -31,7 +32,7 @@ namespace Application.OrderItems.Commands.CreateOrderItem
                 UnitPrice = request.UnitPrice
             };
 
-            await _orderItemRepository.AddAsync(orderItem);
+            await _orderItemRepository.AddAsync(orderItem, cancellationToken);
         }
     }
 }

@@ -1,4 +1,5 @@
-﻿using Application.OrderItems.Commands.CreateOrderItem;
+﻿using Application;
+using Application.OrderItems.Commands.CreateOrderItem;
 using Application.OrderItems.Queries.GetOrderItemById;
 using Carter;
 using Domain.Interfaces;
@@ -30,15 +31,14 @@ public class StartUp
         // Repos
         services.AddScoped<IOrderItemsRepository, OrderItemsRepository>();
 
-        // TEST
-        services.AddScoped<GetOrderItemByIdQueryHandler>();
-        services.AddScoped<CreateOrderItemCommandHandler>();
-
         // Routing modules
         services.AddCarter();
 
         // Add services to the container.
         services.AddControllers().AddApplicationPart(presentationAssembly);
+
+        // TEST
+        services.AddMediatR(cfg => cfg.RegisterServicesFromAssembly(typeof(Application.AssemblyRefference).Assembly));
 
         services.AddEndpointsApiExplorer();
         services.AddSwaggerGen();
