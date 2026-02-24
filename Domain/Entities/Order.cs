@@ -10,5 +10,5 @@ public class Order
     public DateTime OrderDate { get; set; }
     public decimal TotalPrice => Items.Sum(x => x.UnitPrice);
 
-    public List<OrderItem> Items { get; set; }
+    public List<OrderItem> Items { get; set; } = null!;
 }

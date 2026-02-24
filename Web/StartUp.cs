@@ -29,6 +29,7 @@ public class StartUp
         var presentationAssembly = typeof(Presentation.WeatherForecast).Assembly;
 
         // Repos
+        services.AddScoped<IOrdersRepository, OrdersRepository>();
         services.AddScoped<IOrderItemsRepository, OrderItemsRepository>();
 
         // Routing modules

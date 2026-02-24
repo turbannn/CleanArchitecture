@@ -24,12 +24,25 @@ namespace Application.OrderItems.Commands.CreateOrderItem
                 throw new ArgumentException("Quantity must be greater than zero.");
             }
 
+            if (request.OrderId.Equals(Guid.Empty))
+            {
+                throw new NullReferenceException();
+            }
+
+            var oi = await _orderItemRepository.GetByIdAsync(request.OrderId, cancellationToken);
+
+            if(oi is null)
+                throw new NullReferenceException();
+            
+            //End test validation
+
             var orderItem = new OrderItem()
             {
                 Id = new Guid(),
                 Quantity = request.Quantity,
                 ProductName = request.ProductName,
-                UnitPrice = request.UnitPrice
+                UnitPrice = request.UnitPrice,
+                OrderId = request.OrderId
             };
 
             await _orderItemRepository.AddAsync(orderItem, cancellationToken);

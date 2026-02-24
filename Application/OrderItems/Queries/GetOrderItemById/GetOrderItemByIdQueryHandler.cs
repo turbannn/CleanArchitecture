@@ -17,7 +17,7 @@ public class GetOrderItemByIdQueryHandler : IRequestHandler<GetOrderItemByIdQuer
 
     public async Task<OrderItem> Handle(GetOrderItemByIdQuery request, CancellationToken cancellationToken)
     {
-        var orderItem = await _orderItemRepository.GetAsync(request.Id, cancellationToken);
+        var orderItem = await _orderItemRepository.GetByIdAsync(request.Id, cancellationToken);
 
         if (orderItem is null)
         {

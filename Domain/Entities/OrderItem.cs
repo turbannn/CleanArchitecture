@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.ComponentModel.DataAnnotations.Schema;
 using System.Text;
 
 namespace Domain.Entities;
@@ -10,5 +11,8 @@ public class OrderItem
     public decimal UnitPrice { get; set; }
     public string ProductName { get; set; } = null!;
     public int Quantity { get; set; }
-    //public Guid OrderId { get; set; }
+
+    public Guid OrderId { get; set; }
+    [ForeignKey(nameof(OrderId))]
+    public Order Order { get; set; } = null!;
 }

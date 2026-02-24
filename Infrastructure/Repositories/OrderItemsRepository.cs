@@ -17,7 +17,7 @@ namespace Infrastructure.Repositories
             _ordersDbContext = ordersDbContext;
         }
 
-        public async Task<OrderItem?> GetAsync(Guid id, CancellationToken cancellationToken)
+        public async Task<OrderItem?> GetByIdAsync(Guid id, CancellationToken cancellationToken)
         {
             var item = await _ordersDbContext.OrderItems.FindAsync(id, cancellationToken);
             return item;
