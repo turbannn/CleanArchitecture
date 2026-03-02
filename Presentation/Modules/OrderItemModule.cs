@@ -1,4 +1,6 @@
 ﻿using Application.OrderItems.Commands.CreateOrderItem;
+using Application.OrderItems.Commands.DeleteOrderItem;
+using Application.OrderItems.Commands.UpdateOrderItem;
 using Application.OrderItems.Queries.GetOrderItemById;
 using Carter;
 using Domain.Interfaces;
@@ -32,6 +34,22 @@ public class OrderItemModule : ICarterModule
         app.MapPost("/OrderItems/Create", async ([FromBody] CreateOrderItemCommand request, ISender sender, CancellationToken cancellation) =>
         {
             await sender.Send(request, cancellation);
+
+            return Results.Ok();
+        });
+
+        app.MapPut("/OrderItems/Update", async ([FromBody] UpdateOrderItemCommand request, ISender sender, CancellationToken cancellation) =>
+        {
+            await sender.Send(request, cancellation);
+
+            return Results.Ok();
+        });
+
+        app.MapDelete("/OrderItems/DeleteById", async ([FromQuery] Guid id, ISender sender, CancellationToken cancellation) =>
+        {
+            var query = new DeleteOrderItemCommand(id);
+
+            await sender.Send(query, cancellation);
 
             return Results.Ok();
         });

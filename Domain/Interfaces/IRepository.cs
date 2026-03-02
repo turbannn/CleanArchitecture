@@ -8,7 +8,7 @@ namespace Domain.Interfaces
     {
         Task<TEntity?> GetByIdAsync(Guid id, CancellationToken cancellationToken);
         Task AddAsync(TEntity entityToAdd, CancellationToken cancellationToken);
-        Task UpdateAsync(TEntity entityToUpadte, CancellationToken cancellationToken);
+        Task UpdateAsync(TEntity entityToUpdate, CancellationToken cancellationToken);
         Task DeleteAsync(Guid id, CancellationToken cancellationToken);
     }
 }

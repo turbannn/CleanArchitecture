@@ -1,4 +1,5 @@
 ﻿using Application.Orders.Commands.CreateOrder;
+using Application.Orders.Commands.DeleteOrder;
 using Application.Orders.Queries.GetOrderById;
 using Carter;
 using MediatR;
@@ -28,6 +29,15 @@ public class OrderModule : ICarterModule
         app.MapPost("/Orders/Create", async (CreateOrderCommand request, ISender sender, CancellationToken cancellation) =>
         {
             await sender.Send(request, cancellation);
+            return Results.Ok();
+        });
+
+        app.MapDelete("/Orders/DeleteById", async (Guid id, ISender sender, CancellationToken cancellation) =>
+        {
+            var query = new DeleteOrderCommand(id);
+
+            await sender.Send(query, cancellation);
+
             return Results.Ok();
         });
     }

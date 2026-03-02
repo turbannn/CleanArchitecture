@@ -28,13 +28,13 @@ namespace Infrastructure.Repositories
             await _ordersDbContext.SaveChangesAsync(cancellationToken);
         }
 
-        public async Task UpdateAsync(OrderItem entityToUpadte, CancellationToken cancellationToken)
+        public async Task UpdateAsync(OrderItem entityToUpdate, CancellationToken cancellationToken)
         {
-            await _ordersDbContext.OrderItems.ExecuteUpdateAsync(
-                s => s
-                .SetProperty(p => p.UnitPrice, entityToUpadte.UnitPrice)
-                .SetProperty(p => p.ProductName, entityToUpadte.ProductName)
-                .SetProperty(p => p.Quantity, entityToUpadte.Quantity), 
+            await _ordersDbContext.OrderItems.Where(oi => oi.Id == entityToUpdate.Id)
+                .ExecuteUpdateAsync(s => s
+                .SetProperty(p => p.UnitPrice, entityToUpdate.UnitPrice)
+                .SetProperty(p => p.ProductName, entityToUpdate.ProductName)
+                .SetProperty(p => p.Quantity, entityToUpdate.Quantity), 
                 cancellationToken);
         }
 
