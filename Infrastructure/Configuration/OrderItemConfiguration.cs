@@ -14,5 +14,6 @@ internal class OrderItemConfiguration : IEntityTypeConfiguration<OrderItem>
         builder.Property(oi => oi.UnitPrice).IsRequired();
         builder.Property(oi => oi.ProductName).IsRequired().HasMaxLength(40);
         builder.Property(oi => oi.Quantity).IsRequired();
+        builder.Property(oi => oi.StockKeepingUnit).IsRequired().HasMaxLength(40);
     }
 }
