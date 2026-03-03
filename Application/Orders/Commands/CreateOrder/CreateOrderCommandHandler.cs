@@ -1,6 +1,9 @@
 ﻿using Application.OrderItems.Commands.CreateOrderItem;
+using Application.OrderItems.Dto;
+using Application.Orders.Commands.UpdateOrder;
 using Domain.Entities;
 using Domain.Interfaces;
+using FluentValidation;
 using MediatR;
 using System;
 using System.Collections.Generic;
@@ -11,15 +14,23 @@ namespace Application.Orders.Commands.CreateOrder;
 public class CreateOrderCommandHandler : IRequestHandler<CreateOrderCommand>
 {
     private readonly IOrdersRepository _ordersRepository;
-    public CreateOrderCommandHandler(IOrdersRepository ordersRepository)
+    private readonly IValidator<CreateOrderCommand> _validator;
+
+    public CreateOrderCommandHandler(IOrdersRepository ordersRepository, IValidator<CreateOrderCommand> validator)
     {
         _ordersRepository = ordersRepository;
+        _validator = validator;
     }
 
     public async Task Handle(CreateOrderCommand request, CancellationToken cancellationToken)
     {
-        if(request.OrderItems.Count == 0)
-            throw new ArgumentException("Order must contain at least one item.");
+        var res = await _validator.ValidateAsync(request, cancellationToken);
+
+        if (!res.IsValid)
+        {
+            Console.WriteLine(res.Errors.First());
+            return;
+        }
 
         //Test
         var orderItems = new List<OrderItem>();

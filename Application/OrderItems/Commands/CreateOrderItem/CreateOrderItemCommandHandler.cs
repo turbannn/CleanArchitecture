@@ -1,5 +1,6 @@
 ﻿using Domain.Entities;
 using Domain.Interfaces;
+using FluentValidation;
 using MediatR;
 using System;
 using System.Collections.Generic;
@@ -10,23 +11,22 @@ namespace Application.OrderItems.Commands.CreateOrderItem
     public class CreateOrderItemCommandHandler : IRequestHandler<CreateOrderItemCommand>
     {
         private readonly IOrderItemsRepository _orderItemRepository;
+        private readonly IValidator<CreateOrderItemCommand> _validator;
 
-        public CreateOrderItemCommandHandler(IOrderItemsRepository orderItemRepository)
+        public CreateOrderItemCommandHandler(IOrderItemsRepository orderItemRepository, IValidator<CreateOrderItemCommand> validator)
         {
             _orderItemRepository = orderItemRepository;
+            _validator = validator;
         }
 
         public async Task Handle(CreateOrderItemCommand request, CancellationToken cancellationToken)
         {
-            //Test validation
-            if (request.Quantity <= 0)
-            {
-                throw new ArgumentException("Quantity must be greater than zero.");
-            }
+            var res = await _validator.ValidateAsync(request, cancellationToken);
 
-            if (request.OrderId.Equals(Guid.Empty))
+            if (!res.IsValid)
             {
-                throw new NullReferenceException();
+                Console.WriteLine(res.Errors.First());
+                return;
             }
 
             var oi = await _orderItemRepository.GetByIdAsync(request.OrderId, cancellationToken);
@@ -34,8 +34,6 @@ namespace Application.OrderItems.Commands.CreateOrderItem
             if(oi is null)
                 throw new NullReferenceException();
             
-            //End test validation
-
             var orderItem = new OrderItem()
             {
                 Id = new Guid(),

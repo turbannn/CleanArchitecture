@@ -3,6 +3,7 @@ using Application.OrderItems.Commands.CreateOrderItem;
 using Application.OrderItems.Queries.GetOrderItemById;
 using Carter;
 using Domain.Interfaces;
+using FluentValidation;
 using Infrastructure.Data;
 using Infrastructure.Repositories;
 using Microsoft.EntityFrameworkCore;
@@ -40,6 +41,9 @@ public class StartUp
 
         // TEST
         services.AddMediatR(cfg => cfg.RegisterServicesFromAssembly(typeof(Application.AssemblyRefference).Assembly));
+
+        //Validators
+        services.AddValidatorsFromAssembly(typeof(Application.AssemblyRefference).Assembly);
 
         services.AddEndpointsApiExplorer();
         services.AddSwaggerGen();

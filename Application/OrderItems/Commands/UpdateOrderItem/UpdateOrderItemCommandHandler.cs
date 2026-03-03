@@ -1,5 +1,7 @@
-﻿using Domain.Entities;
+﻿using Application.OrderItems.Commands.DeleteOrderItem;
+using Domain.Entities;
 using Domain.Interfaces;
+using FluentValidation;
 using MediatR;
 using System;
 using System.Collections.Generic;
@@ -10,20 +12,24 @@ namespace Application.OrderItems.Commands.UpdateOrderItem
     public class UpdateOrderItemCommandHandler : IRequestHandler<UpdateOrderItemCommand>
     {
         private readonly IOrderItemsRepository _orderItemRepository;
+        private readonly IValidator<UpdateOrderItemCommand> _validator;
 
-        public UpdateOrderItemCommandHandler(IOrderItemsRepository orderItemRepository)
+        public UpdateOrderItemCommandHandler(IOrderItemsRepository orderItemRepository, IValidator<UpdateOrderItemCommand> validator)
         {
             _orderItemRepository = orderItemRepository;
+            _validator = validator;
         }
 
         public async Task Handle(UpdateOrderItemCommand request, CancellationToken cancellationToken)
         {
-            if (request.UnitPrice <= 0)
-                throw new InvalidDataException("Unit price can't be less or equal zero");
+            var res = await _validator.ValidateAsync(request, cancellationToken);
 
-            if(request.Quantity <= 0)
-                throw new InvalidDataException("Quantity can't be less or equal zero");
-            
+            if (!res.IsValid)
+            {
+                Console.WriteLine(res.Errors.First());
+                return;
+            }
+
             var oi = new OrderItem
             {
                 Id = request.Id,

@@ -1,5 +1,7 @@
-﻿using Domain.Entities;
+﻿using Application.Orders.Queries.GetOrderById;
+using Domain.Entities;
 using Domain.Interfaces;
+using FluentValidation;
 using MediatR;
 using System;
 using System.Collections.Generic;
@@ -10,19 +12,23 @@ namespace Application.Orders.Commands.UpdateOrder
     public class UpdateOrderCommandHandler : IRequestHandler<UpdateOrderCommand>
     {
         private readonly IOrdersRepository _ordersRepository;
+        private readonly IValidator<UpdateOrderCommand> _validator;
 
-        public UpdateOrderCommandHandler(IOrdersRepository ordersRepository)
+        public UpdateOrderCommandHandler(IOrdersRepository ordersRepository, IValidator<UpdateOrderCommand> validator)
         {
             _ordersRepository = ordersRepository;
+            _validator = validator;
         }
 
         public async Task Handle(UpdateOrderCommand request, CancellationToken cancellationToken)
         {
-            if(string.IsNullOrEmpty(request.ShippingAddress))
-                throw new ArgumentException("Shipping address cannot be null or empty.");
+            var res = await _validator.ValidateAsync(request, cancellationToken);
 
-            if (string.IsNullOrEmpty(request.Notes))
-                throw new ArgumentException("Notes cannot be null or empty");
+            if (!res.IsValid)
+            {
+                Console.WriteLine(res.Errors.First());
+                return;
+            }
 
             var order = new Order
             {
