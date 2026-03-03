@@ -32,6 +32,7 @@ public class CreateOrderCommandHandler : IRequestHandler<CreateOrderCommand>
                 ProductName = oi.ProductName,
                 UnitPrice = oi.UnitPrice,
                 Quantity = oi.Quantity,
+                StockKeepingUnit = oi.StockKeepingUnit
             });
         }
 
@@ -39,6 +40,8 @@ public class CreateOrderCommandHandler : IRequestHandler<CreateOrderCommand>
         {
             Id = Guid.NewGuid(),
             OrderDate = DateTime.UtcNow,
+            ShippingAddress = request.ShippingAddress,
+            Notes = request.Notes,
             Items = orderItems
         };
 

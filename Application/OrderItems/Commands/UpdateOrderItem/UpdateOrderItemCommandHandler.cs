@@ -29,7 +29,8 @@ namespace Application.OrderItems.Commands.UpdateOrderItem
                 Id = request.Id,
                 ProductName = request.ProductName,
                 Quantity = request.Quantity,
-                UnitPrice = request.UnitPrice
+                UnitPrice = request.UnitPrice,
+                StockKeepingUnit = request.StockKeepingUnit
             };
 
             await _orderItemRepository.UpdateAsync(oi, cancellationToken);

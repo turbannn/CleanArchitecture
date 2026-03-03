@@ -5,4 +5,4 @@ using System.Text;
 
 namespace Application.OrderItems.Commands.CreateOrderItem;
 
-public sealed record CreateOrderItemCommand(decimal UnitPrice, string ProductName, int Quantity, Guid OrderId) : IRequest;
+public sealed record CreateOrderItemCommand(decimal UnitPrice, string ProductName, int Quantity, string StockKeepingUnit, Guid OrderId) : IRequest;

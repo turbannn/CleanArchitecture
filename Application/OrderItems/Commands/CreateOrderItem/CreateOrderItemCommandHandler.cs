@@ -42,6 +42,7 @@ namespace Application.OrderItems.Commands.CreateOrderItem
                 Quantity = request.Quantity,
                 ProductName = request.ProductName,
                 UnitPrice = request.UnitPrice,
+                StockKeepingUnit = request.StockKeepingUnit,
                 OrderId = request.OrderId
             };
 

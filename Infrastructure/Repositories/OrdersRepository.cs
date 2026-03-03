@@ -29,7 +29,9 @@ namespace Infrastructure.Repositories
         }
         public async Task UpdateAsync(Order entityToUpdate, CancellationToken cancellationToken)
         {
-            await _ordersDbContext.Orders.Where(o => o.Id == entityToUpdate.Id).ExecuteUpdateAsync(s => s.SetProperty(p => p.OrderDate, entityToUpdate.OrderDate));
+            await _ordersDbContext.Orders.Where(o => o.Id == entityToUpdate.Id).ExecuteUpdateAsync(s => s
+            .SetProperty(p => p.ShippingAddress, entityToUpdate.ShippingAddress)
+            .SetProperty(p => p.Notes, entityToUpdate.Notes));
         }
         public async Task DeleteAsync(Guid id, CancellationToken cancellationToken)
         {

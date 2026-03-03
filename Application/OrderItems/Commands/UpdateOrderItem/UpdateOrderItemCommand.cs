@@ -5,5 +5,5 @@ using System.Text;
 
 namespace Application.OrderItems.Commands.UpdateOrderItem
 {
-    public sealed record UpdateOrderItemCommand(Guid Id, decimal UnitPrice, string ProductName, int Quantity) : IRequest;
+    public sealed record UpdateOrderItemCommand(Guid Id, decimal UnitPrice, string ProductName, int Quantity, string StockKeepingUnit) : IRequest;
 }

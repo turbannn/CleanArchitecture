@@ -7,5 +7,5 @@ using System.Text;
 
 namespace Application.Orders.Commands.CreateOrder
 {
-    public sealed record CreateOrderCommand(List<CreateOrderItemDto> OrderItems) : IRequest;
+    public sealed record CreateOrderCommand(string ShippingAddress, string Notes, List<CreateOrderItemDto> OrderItems) : IRequest;
 }

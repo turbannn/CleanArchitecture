@@ -11,6 +11,7 @@ public class OrderItem
     public decimal UnitPrice { get; set; }
     public string ProductName { get; set; } = null!;
     public int Quantity { get; set; }
+    public string StockKeepingUnit { get; set; } = null!;
 
     public Guid OrderId { get; set; }
     [ForeignKey(nameof(OrderId))]
