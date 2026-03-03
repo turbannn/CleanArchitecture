@@ -7,35 +7,34 @@ using System;
 using System.Collections.Generic;
 using System.Text;
 
-namespace Application.Orders.Queries.GetOrderById
+namespace Application.Orders.Queries.GetOrderById;
+
+public class GetOrderByIdQueryHandler : IRequestHandler<GetOrderByIdQuery, Order>
 {
-    public class GetOrderByIdQueryHandler : IRequestHandler<GetOrderByIdQuery, Order>
+    private readonly IOrdersRepository _ordersRepository;
+    private readonly IValidator<GetOrderByIdQuery> _validator;
+
+    public GetOrderByIdQueryHandler(IOrdersRepository ordersRepository, IValidator<GetOrderByIdQuery> validator)
     {
-        private readonly IOrdersRepository _ordersRepository;
-        private readonly IValidator<GetOrderByIdQuery> _validator;
+        _ordersRepository = ordersRepository;
+        _validator = validator;
+    }
 
-        public GetOrderByIdQueryHandler(IOrdersRepository ordersRepository, IValidator<GetOrderByIdQuery> validator)
+    public async Task<Order> Handle(GetOrderByIdQuery request, CancellationToken cancellationToken)
+    {
+        var res = await _validator.ValidateAsync(request, cancellationToken);
+
+        if (!res.IsValid)
         {
-            _ordersRepository = ordersRepository;
-            _validator = validator;
+            Console.WriteLine(res.Errors.First());
+            return new Order { Notes = "null" };
         }
 
-        public async Task<Order> Handle(GetOrderByIdQuery request, CancellationToken cancellationToken)
-        {
-            var res = await _validator.ValidateAsync(request, cancellationToken);
+        var order = await _ordersRepository.GetByIdAsync(request.Id, cancellationToken);
 
-            if (!res.IsValid)
-            {
-                Console.WriteLine(res.Errors.First());
-                return new Order { Notes = "null" };
-            }
+        if (order is null)
+            throw new NullReferenceException("Order not found");
 
-            var order = await _ordersRepository.GetByIdAsync(request.Id, cancellationToken);
-
-            if (order is null)
-                throw new NullReferenceException("Order not found");
-
-            return order;
-        }
+        return order;
     }
 }

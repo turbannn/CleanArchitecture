@@ -3,13 +3,12 @@ using System;
 using System.Collections.Generic;
 using System.Text;
 
-namespace Application.Orders.Queries.GetOrderById
+namespace Application.Orders.Queries.GetOrderById;
+
+public class GetOrderByIdQueryValidator : AbstractValidator<GetOrderByIdQuery>
 {
-    public class GetOrderByIdQueryValidator : AbstractValidator<GetOrderByIdQuery>
+    public GetOrderByIdQueryValidator()
     {
-        public GetOrderByIdQueryValidator()
-        {
-            RuleFor(x => x.Id).NotEmpty().WithMessage("Id is required.");
-        }
+        RuleFor(x => x.Id).NotEmpty().WithMessage("Id is required.");
     }
 }

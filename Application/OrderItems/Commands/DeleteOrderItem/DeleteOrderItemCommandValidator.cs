@@ -3,13 +3,12 @@ using System;
 using System.Collections.Generic;
 using System.Text;
 
-namespace Application.OrderItems.Commands.DeleteOrderItem
+namespace Application.OrderItems.Commands.DeleteOrderItem;
+
+public class DeleteOrderItemCommandValidator : AbstractValidator<DeleteOrderItemCommand>
 {
-    public class DeleteOrderItemCommandValidator : AbstractValidator<DeleteOrderItemCommand>
+    public DeleteOrderItemCommandValidator()
     {
-        public DeleteOrderItemCommandValidator()
-        {
-            RuleFor(x => x.Id).NotEmpty().WithMessage("Id is required.");
-        }
+        RuleFor(x => x.Id).NotEmpty().WithMessage("Id is required.");
     }
 }

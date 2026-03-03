@@ -3,14 +3,13 @@ using System;
 using System.Collections.Generic;
 using System.Text;
 
-namespace Application.Orders.Commands.DeleteOrder
+namespace Application.Orders.Commands.DeleteOrder;
+
+public class DeleteOrderCommandValidator : AbstractValidator<DeleteOrderCommand>
 {
-    public class DeleteOrderCommandValidator : AbstractValidator<DeleteOrderCommand>
+    public DeleteOrderCommandValidator()
     {
-        public DeleteOrderCommandValidator()
-        {
-            RuleFor(x => x.Id)
-                .NotEmpty().WithMessage("Order Id must not be empty.");
-        }
+        RuleFor(x => x.Id)
+            .NotEmpty().WithMessage("Order Id must not be empty.");
     }
 }

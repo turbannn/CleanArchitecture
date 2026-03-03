@@ -7,39 +7,38 @@ using System;
 using System.Collections.Generic;
 using System.Text;
 
-namespace Application.OrderItems.Commands.UpdateOrderItem
+namespace Application.OrderItems.Commands.UpdateOrderItem;
+
+public class UpdateOrderItemCommandHandler : IRequestHandler<UpdateOrderItemCommand>
 {
-    public class UpdateOrderItemCommandHandler : IRequestHandler<UpdateOrderItemCommand>
+    private readonly IOrderItemsRepository _orderItemRepository;
+    private readonly IValidator<UpdateOrderItemCommand> _validator;
+
+    public UpdateOrderItemCommandHandler(IOrderItemsRepository orderItemRepository, IValidator<UpdateOrderItemCommand> validator)
     {
-        private readonly IOrderItemsRepository _orderItemRepository;
-        private readonly IValidator<UpdateOrderItemCommand> _validator;
+        _orderItemRepository = orderItemRepository;
+        _validator = validator;
+    }
 
-        public UpdateOrderItemCommandHandler(IOrderItemsRepository orderItemRepository, IValidator<UpdateOrderItemCommand> validator)
+    public async Task Handle(UpdateOrderItemCommand request, CancellationToken cancellationToken)
+    {
+        var res = await _validator.ValidateAsync(request, cancellationToken);
+
+        if (!res.IsValid)
         {
-            _orderItemRepository = orderItemRepository;
-            _validator = validator;
+            Console.WriteLine(res.Errors.First());
+            return;
         }
 
-        public async Task Handle(UpdateOrderItemCommand request, CancellationToken cancellationToken)
+        var oi = new OrderItem
         {
-            var res = await _validator.ValidateAsync(request, cancellationToken);
+            Id = request.Id,
+            ProductName = request.ProductName,
+            Quantity = request.Quantity,
+            UnitPrice = request.UnitPrice,
+            StockKeepingUnit = request.StockKeepingUnit
+        };
 
-            if (!res.IsValid)
-            {
-                Console.WriteLine(res.Errors.First());
-                return;
-            }
-
-            var oi = new OrderItem
-            {
-                Id = request.Id,
-                ProductName = request.ProductName,
-                Quantity = request.Quantity,
-                UnitPrice = request.UnitPrice,
-                StockKeepingUnit = request.StockKeepingUnit
-            };
-
-            await _orderItemRepository.UpdateAsync(oi, cancellationToken);
-        }
+        await _orderItemRepository.UpdateAsync(oi, cancellationToken);
     }
 }
