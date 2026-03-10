@@ -11,12 +11,19 @@ namespace Application.OrderItems.Commands.CreateOrderItem;
 public class CreateOrderItemCommandHandler : IRequestHandler<CreateOrderItemCommand>
 {
     private readonly IOrderItemsRepository _orderItemRepository;
+    private readonly IOrdersRepository _ordersRepository;
     private readonly IValidator<CreateOrderItemCommand> _validator;
+    private readonly IMapper<CreateOrderItemCommand, OrderItem> _mapper;
 
-    public CreateOrderItemCommandHandler(IOrderItemsRepository orderItemRepository, IValidator<CreateOrderItemCommand> validator)
+    public CreateOrderItemCommandHandler(IOrderItemsRepository orderItemRepository, 
+        IOrdersRepository ordersRepository, 
+        IValidator<CreateOrderItemCommand> validator, 
+        IMapper<CreateOrderItemCommand, OrderItem> mapper)
     {
         _orderItemRepository = orderItemRepository;
+        _ordersRepository = ordersRepository;
         _validator = validator;
+        _mapper = mapper;
     }
 
     public async Task Handle(CreateOrderItemCommand request, CancellationToken cancellationToken)
@@ -29,21 +36,15 @@ public class CreateOrderItemCommandHandler : IRequestHandler<CreateOrderItemComm
             return;
         }
 
-        var oi = await _orderItemRepository.GetByIdAsync(request.OrderId, cancellationToken);
+        var oi = await _ordersRepository.GetByIdAsync(request.OrderId, cancellationToken);
 
         if(oi is null)
             throw new NullReferenceException();
-        
-        var orderItem = new OrderItem()
-        {
-            Id = new Guid(),
-            Quantity = request.Quantity,
-            ProductName = request.ProductName,
-            UnitPrice = request.UnitPrice,
-            StockKeepingUnit = request.StockKeepingUnit,
-            OrderId = request.OrderId
-        };
 
-        await _orderItemRepository.AddAsync(orderItem, cancellationToken);
+        var oi2 = _mapper.Map(request);
+
+        oi2.Id = Guid.NewGuid();
+
+        await _orderItemRepository.AddAsync(oi2, cancellationToken);
     }
 }

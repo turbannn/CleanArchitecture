@@ -13,11 +13,14 @@ public class UpdateOrderCommandHandler : IRequestHandler<UpdateOrderCommand>
 {
     private readonly IOrdersRepository _ordersRepository;
     private readonly IValidator<UpdateOrderCommand> _validator;
+    private readonly IMapper<UpdateOrderCommand, Order> _mapper;
 
-    public UpdateOrderCommandHandler(IOrdersRepository ordersRepository, IValidator<UpdateOrderCommand> validator)
+
+    public UpdateOrderCommandHandler(IOrdersRepository ordersRepository, IValidator<UpdateOrderCommand> validator, IMapper<UpdateOrderCommand, Order> mapper)
     {
         _ordersRepository = ordersRepository;
         _validator = validator;
+        _mapper = mapper;
     }
 
     public async Task Handle(UpdateOrderCommand request, CancellationToken cancellationToken)
@@ -30,12 +33,14 @@ public class UpdateOrderCommandHandler : IRequestHandler<UpdateOrderCommand>
             return;
         }
 
+        var order = _mapper.Map(request);
+        /*
         var order = new Order
         {
             Id = request.Id,
             ShippingAddress = request.ShippingAddress,
             Notes = request.Notes
-        };
+        };*/
 
         await _ordersRepository.UpdateAsync(order, cancellationToken);
     }

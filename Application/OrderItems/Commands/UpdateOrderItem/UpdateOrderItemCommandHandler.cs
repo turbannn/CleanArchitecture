@@ -1,4 +1,5 @@
-﻿using Application.OrderItems.Commands.DeleteOrderItem;
+﻿using Application.OrderItems.Commands.CreateOrderItem;
+using Application.OrderItems.Commands.DeleteOrderItem;
 using Domain.Entities;
 using Domain.Interfaces;
 using FluentValidation;
@@ -13,11 +14,13 @@ public class UpdateOrderItemCommandHandler : IRequestHandler<UpdateOrderItemComm
 {
     private readonly IOrderItemsRepository _orderItemRepository;
     private readonly IValidator<UpdateOrderItemCommand> _validator;
+    private readonly IMapper<UpdateOrderItemCommand, OrderItem> _mapper;
 
-    public UpdateOrderItemCommandHandler(IOrderItemsRepository orderItemRepository, IValidator<UpdateOrderItemCommand> validator)
+    public UpdateOrderItemCommandHandler(IOrderItemsRepository orderItemRepository, IValidator<UpdateOrderItemCommand> validator, IMapper<UpdateOrderItemCommand, OrderItem> mapper)
     {
         _orderItemRepository = orderItemRepository;
         _validator = validator;
+        _mapper = mapper;
     }
 
     public async Task Handle(UpdateOrderItemCommand request, CancellationToken cancellationToken)
@@ -30,6 +33,8 @@ public class UpdateOrderItemCommandHandler : IRequestHandler<UpdateOrderItemComm
             return;
         }
 
+        var oi = _mapper.Map(request);
+        /*
         var oi = new OrderItem
         {
             Id = request.Id,
@@ -37,7 +42,7 @@ public class UpdateOrderItemCommandHandler : IRequestHandler<UpdateOrderItemComm
             Quantity = request.Quantity,
             UnitPrice = request.UnitPrice,
             StockKeepingUnit = request.StockKeepingUnit
-        };
+        };*/
 
         await _orderItemRepository.UpdateAsync(oi, cancellationToken);
     }

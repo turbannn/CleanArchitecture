@@ -15,11 +15,18 @@ public class CreateOrderCommandHandler : IRequestHandler<CreateOrderCommand>
 {
     private readonly IOrdersRepository _ordersRepository;
     private readonly IValidator<CreateOrderCommand> _validator;
+    private readonly IMapper<CreateOrderCommand, Order> _mapper;
+    private readonly IMapper<CreateOrderItemDto, OrderItem> _orderItemMapper;
 
-    public CreateOrderCommandHandler(IOrdersRepository ordersRepository, IValidator<CreateOrderCommand> validator)
+    public CreateOrderCommandHandler(IOrdersRepository ordersRepository, 
+        IValidator<CreateOrderCommand> validator, 
+        IMapper<CreateOrderCommand, Order> mapper, 
+        IMapper<CreateOrderItemDto, OrderItem> orderItemDtoMapper)
     {
         _ordersRepository = ordersRepository;
         _validator = validator;
+        _mapper = mapper;
+        _orderItemMapper = orderItemDtoMapper;
     }
 
     public async Task Handle(CreateOrderCommand request, CancellationToken cancellationToken)
@@ -37,16 +44,20 @@ public class CreateOrderCommandHandler : IRequestHandler<CreateOrderCommand>
 
         foreach (var oi in request.OrderItems)
         {
-            orderItems.Add(new OrderItem
+            var item = _orderItemMapper.Map(oi);
+            if(item is not null)
             {
-                Id = Guid.NewGuid(),
-                ProductName = oi.ProductName,
-                UnitPrice = oi.UnitPrice,
-                Quantity = oi.Quantity,
-                StockKeepingUnit = oi.StockKeepingUnit
-            });
+                item.Id = Guid.NewGuid();
+                orderItems.Add(item);
+            }
         }
 
+        var order = _mapper.Map(request);
+        order.Id = Guid.NewGuid();
+        order.OrderDate = DateTime.UtcNow;
+        order.Items = orderItems;
+
+        /*
         var order = new Order
         {
             Id = Guid.NewGuid(),
@@ -54,7 +65,7 @@ public class CreateOrderCommandHandler : IRequestHandler<CreateOrderCommand>
             ShippingAddress = request.ShippingAddress,
             Notes = request.Notes,
             Items = orderItems
-        };
+        };*/
 
         await _ordersRepository.AddAsync(order, cancellationToken);
     }
