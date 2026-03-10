@@ -34,13 +34,6 @@ public class UpdateOrderCommandHandler : IRequestHandler<UpdateOrderCommand>
         }
 
         var order = _mapper.Map(request);
-        /*
-        var order = new Order
-        {
-            Id = request.Id,
-            ShippingAddress = request.ShippingAddress,
-            Notes = request.Notes
-        };*/
 
         await _ordersRepository.UpdateAsync(order, cancellationToken);
     }

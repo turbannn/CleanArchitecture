@@ -1,5 +1,4 @@
-﻿using Application.OrderItems.Commands.UpdateOrderItem;
-using Domain.Entities;
+﻿using Domain.Entities;
 using Domain.Interfaces;
 using FluentValidation;
 using MediatR;

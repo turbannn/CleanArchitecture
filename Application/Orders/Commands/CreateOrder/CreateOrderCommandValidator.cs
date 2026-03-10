@@ -10,6 +10,11 @@ public class CreateOrderCommandValidator : AbstractValidator<CreateOrderCommand>
 {
     public CreateOrderCommandValidator()
     {
+        //Ids
+        RuleFor(x => x.UserId)
+            .NotEmpty().WithMessage("UserId is required.")
+            .Must(id => Guid.TryParse(id.ToString(), out _)).WithMessage("CustomerId must be a valid GUID.");
+
         //Strings
         RuleFor(x => x.ShippingAddress)
             .NotEmpty().WithMessage("ShippingAddress is required.")

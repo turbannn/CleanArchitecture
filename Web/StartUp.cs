@@ -5,6 +5,8 @@ using Application.OrderItems.Dto;
 using Application.OrderItems.Queries.GetOrderItemById;
 using Application.Orders.Commands.CreateOrder;
 using Application.Orders.Commands.UpdateOrder;
+using Application.Users.Commands.CreateUser;
+using Application.Users.Commands.UpdateUser;
 using Carter;
 using Domain.Entities;
 using Domain.Interfaces;
@@ -33,17 +35,23 @@ public class StartUp
 
         services.AddDbContext<OrdersDbContext>(options => options.UseNpgsql(connectionString));
 
-        var presentationAssembly = typeof(Presentation.WeatherForecast).Assembly;
+        var presentationAssembly = typeof(Presentation.Modules.OrderItemModule).Assembly;
 
         // Repos
         services.AddScoped<IOrdersRepository, OrdersRepository>();
         services.AddScoped<IOrderItemsRepository, OrderItemsRepository>();
+        services.AddScoped<IUsersRepository, UsersRepository>();
 
         // Routing modules
         services.AddCarter();
 
         // Add services to the container.
-        services.AddControllers().AddApplicationPart(presentationAssembly);
+        services.AddControllers()
+            .AddApplicationPart(presentationAssembly)
+            .AddJsonOptions(options =>
+            {
+                options.JsonSerializerOptions.ReferenceHandler = System.Text.Json.Serialization.ReferenceHandler.IgnoreCycles;
+            });
 
         // Mappers
         services.AddScoped<IMapper<CreateOrderItemCommand, OrderItem>, GenericMapper<CreateOrderItemCommand, OrderItem>>();
@@ -51,6 +59,8 @@ public class StartUp
         services.AddScoped<IMapper<CreateOrderCommand, Order>, GenericMapper<CreateOrderCommand, Order>>();
         services.AddScoped<IMapper<UpdateOrderCommand, Order>, GenericMapper<UpdateOrderCommand, Order>>();
         services.AddScoped<IMapper<CreateOrderItemDto, OrderItem>, GenericMapper<CreateOrderItemDto, OrderItem>>();
+        services.AddScoped<IMapper<CreateUserCommand, User>, GenericMapper<CreateUserCommand, User>>();
+        services.AddScoped<IMapper<UpdateUserCommand, User>, GenericMapper<UpdateUserCommand, User>>();
 
         // TEST
         services.AddMediatR(cfg => cfg.RegisterServicesFromAssembly(typeof(Application.AssemblyRefference).Assembly));
@@ -63,5 +73,11 @@ public class StartUp
 
         // Learn more about configuring OpenAPI at https://aka.ms/aspnet/openapi
         services.AddOpenApi();
+
+        // Configure JSON options for minimal APIs
+        services.ConfigureHttpJsonOptions(options =>
+        {
+            options.SerializerOptions.ReferenceHandler = System.Text.Json.Serialization.ReferenceHandler.IgnoreCycles;
+        });
     }
 }

@@ -19,7 +19,12 @@ namespace Infrastructure.Repositories
 
         public async Task<Order?> GetByIdAsync(Guid id, CancellationToken cancellationToken)
         {
-            return await _ordersDbContext.Orders.FindAsync(id, cancellationToken);
+            var order = await _ordersDbContext.Orders
+                .AsNoTracking()
+                .Include(o => o.Items)
+                .FirstOrDefaultAsync(u => u.Id == id, cancellationToken);
+
+            return order;
         }
 
         public async Task AddAsync(Order entityToAdd, CancellationToken cancellationToken)

@@ -1,5 +1,4 @@
-﻿using Application.OrderItems.Commands.CreateOrderItem;
-using Application.OrderItems.Dto;
+﻿using Application.OrderItems.Dto;
 using Application.Orders.Commands.UpdateOrder;
 using Domain.Entities;
 using Domain.Interfaces;
@@ -14,16 +13,19 @@ namespace Application.Orders.Commands.CreateOrder;
 public class CreateOrderCommandHandler : IRequestHandler<CreateOrderCommand>
 {
     private readonly IOrdersRepository _ordersRepository;
+    private readonly IUsersRepository _usersRepository;
     private readonly IValidator<CreateOrderCommand> _validator;
     private readonly IMapper<CreateOrderCommand, Order> _mapper;
     private readonly IMapper<CreateOrderItemDto, OrderItem> _orderItemMapper;
 
-    public CreateOrderCommandHandler(IOrdersRepository ordersRepository, 
+    public CreateOrderCommandHandler(IOrdersRepository ordersRepository,
+        IUsersRepository usersRepository,
         IValidator<CreateOrderCommand> validator, 
         IMapper<CreateOrderCommand, Order> mapper, 
         IMapper<CreateOrderItemDto, OrderItem> orderItemDtoMapper)
     {
         _ordersRepository = ordersRepository;
+        _usersRepository = usersRepository;
         _validator = validator;
         _mapper = mapper;
         _orderItemMapper = orderItemDtoMapper;
@@ -39,7 +41,11 @@ public class CreateOrderCommandHandler : IRequestHandler<CreateOrderCommand>
             return;
         }
 
-        //Test
+        var us = await _usersRepository.GetByIdAsync(request.UserId, cancellationToken);
+
+        if(us is null)
+            throw new NullReferenceException($"User with id {request.UserId} not found.");
+
         var orderItems = new List<OrderItem>();
 
         foreach (var oi in request.OrderItems)
@@ -56,16 +62,6 @@ public class CreateOrderCommandHandler : IRequestHandler<CreateOrderCommand>
         order.Id = Guid.NewGuid();
         order.OrderDate = DateTime.UtcNow;
         order.Items = orderItems;
-
-        /*
-        var order = new Order
-        {
-            Id = Guid.NewGuid(),
-            OrderDate = DateTime.UtcNow,
-            ShippingAddress = request.ShippingAddress,
-            Notes = request.Notes,
-            Items = orderItems
-        };*/
 
         await _ordersRepository.AddAsync(order, cancellationToken);
     }

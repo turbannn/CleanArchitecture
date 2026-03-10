@@ -34,15 +34,6 @@ public class UpdateOrderItemCommandHandler : IRequestHandler<UpdateOrderItemComm
         }
 
         var oi = _mapper.Map(request);
-        /*
-        var oi = new OrderItem
-        {
-            Id = request.Id,
-            ProductName = request.ProductName,
-            Quantity = request.Quantity,
-            UnitPrice = request.UnitPrice,
-            StockKeepingUnit = request.StockKeepingUnit
-        };*/
 
         await _orderItemRepository.UpdateAsync(oi, cancellationToken);
     }
