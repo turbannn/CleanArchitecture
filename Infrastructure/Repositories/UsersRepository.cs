@@ -28,21 +28,62 @@ public class UsersRepository : IUsersRepository
         return user;
     }
 
-    public async Task AddAsync(User entityToAdd, CancellationToken cancellationToken)
+    public async Task<bool> AddAsync(User entityToAdd, CancellationToken cancellationToken)
     {
-        await _dbContext.Users.AddAsync(entityToAdd, cancellationToken);
-        await _dbContext.SaveChangesAsync();
+        try
+        {
+            await _dbContext.Users.AddAsync(entityToAdd, cancellationToken);
+            await _dbContext.SaveChangesAsync();
+            return true;
+        }
+        catch (Exception ex)
+        {
+            // Log the exception (ex) here as needed
+            return false;
+        }
     }
    
-    public async Task UpdateAsync(User entityToUpdate, CancellationToken cancellationToken)
+    public async Task<bool> UpdateAsync(User entityToUpdate, CancellationToken cancellationToken)
     {
-        await _dbContext.Users.Where(u => u.Id == entityToUpdate.Id).ExecuteUpdateAsync(s => s
-                        .SetProperty(u => u.Username, entityToUpdate.Username)
-                        .SetProperty(u => u.Password, entityToUpdate.Password));
+        try
+        {
+            var existingItem = await _dbContext.Users.FindAsync(entityToUpdate.Id, cancellationToken);
+            if (existingItem == null)
+            {
+                return false; // Item not found
+            }
+        }
+        catch (Exception ex)
+        {
+            // Log the exception (ex) here as needed
+            return false;
+        }
+
+        try
+        {
+            await _dbContext.Users.Where(u => u.Id == entityToUpdate.Id).ExecuteUpdateAsync(s => s
+                            .SetProperty(u => u.Username, entityToUpdate.Username)
+                            .SetProperty(u => u.Password, entityToUpdate.Password));
+            return true;
+        }
+        catch (Exception ex)
+        {
+            // Log the exception (ex) here as needed
+            return false;
+        }
     }
 
-    public async Task DeleteAsync(Guid id, CancellationToken cancellationToken)
+    public async Task<bool> DeleteAsync(Guid id, CancellationToken cancellationToken)
     {
-        await _dbContext.Users.Where(u => u.Id == id).ExecuteDeleteAsync();
+        try
+        {
+            await _dbContext.Users.Where(u => u.Id == id).ExecuteDeleteAsync();
+            return true;
+        }
+        catch (Exception ex)
+        {
+            // Log the exception (ex) here as needed
+            return false;
+        }
     }
 }

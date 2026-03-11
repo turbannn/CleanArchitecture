@@ -2,6 +2,8 @@
 using Application.Orders.Commands.UpdateOrder;
 using Domain.Entities;
 using Domain.Interfaces;
+using Domain.Results;
+using Domain.Utilities;
 using FluentValidation;
 using MediatR;
 using System;
@@ -10,7 +12,7 @@ using System.Text;
 
 namespace Application.Orders.Commands.CreateOrder;
 
-public class CreateOrderCommandHandler : IRequestHandler<CreateOrderCommand>
+public class CreateOrderCommandHandler : IRequestHandler<CreateOrderCommand, GlovoResult>
 {
     private readonly IOrdersRepository _ordersRepository;
     private readonly IUsersRepository _usersRepository;
@@ -31,20 +33,20 @@ public class CreateOrderCommandHandler : IRequestHandler<CreateOrderCommand>
         _orderItemMapper = orderItemDtoMapper;
     }
 
-    public async Task Handle(CreateOrderCommand request, CancellationToken cancellationToken)
+    public async Task<GlovoResult> Handle(CreateOrderCommand request, CancellationToken cancellationToken)
     {
         var res = await _validator.ValidateAsync(request, cancellationToken);
 
         if (!res.IsValid)
         {
             Console.WriteLine(res.Errors.First());
-            return;
+            return GlovoResult.Fail(res.Errors.First().ErrorMessage, GlovoStatusCodes.BadRequest);
         }
 
         var us = await _usersRepository.GetByIdAsync(request.UserId, cancellationToken);
 
         if(us is null)
-            throw new NullReferenceException($"User with id {request.UserId} not found.");
+            GlovoResult.Fail($"User with id {request.UserId} not found.", GlovoStatusCodes.NotFound);
 
         var orderItems = new List<OrderItem>();
 
@@ -63,6 +65,11 @@ public class CreateOrderCommandHandler : IRequestHandler<CreateOrderCommand>
         order.OrderDate = DateTime.UtcNow;
         order.Items = orderItems;
 
-        await _ordersRepository.AddAsync(order, cancellationToken);
+        var createRes = await _ordersRepository.AddAsync(order, cancellationToken);
+
+        if (!createRes)
+            return GlovoResult.Fail("Internal server error", GlovoStatusCodes.InternalServerError);
+        else
+            return GlovoResult.Success();
     }
 }

@@ -1,5 +1,7 @@
 ﻿using Domain.Entities;
 using Domain.Interfaces;
+using Domain.Results;
+using Domain.Utilities;
 using FluentValidation;
 using MediatR;
 using System;
@@ -8,7 +10,7 @@ using System.Text;
 
 namespace Application.Orders.Queries.GetOrderById;
 
-public class GetOrderByIdQueryHandler : IRequestHandler<GetOrderByIdQuery, Order>
+public class GetOrderByIdQueryHandler : IRequestHandler<GetOrderByIdQuery, GenericGlovoResult<Order>>
 {
     private readonly IOrdersRepository _ordersRepository;
     private readonly IValidator<GetOrderByIdQuery> _validator;
@@ -19,21 +21,21 @@ public class GetOrderByIdQueryHandler : IRequestHandler<GetOrderByIdQuery, Order
         _validator = validator;
     }
 
-    public async Task<Order> Handle(GetOrderByIdQuery request, CancellationToken cancellationToken)
+    public async Task<GenericGlovoResult<Order>> Handle(GetOrderByIdQuery request, CancellationToken cancellationToken)
     {
         var res = await _validator.ValidateAsync(request, cancellationToken);
 
         if (!res.IsValid)
         {
             Console.WriteLine(res.Errors.First());
-            return new Order { Notes = "null" };
+            return GenericGlovoResult<Order>.Fail(res.Errors.First().ErrorMessage, GlovoStatusCodes.BadRequest);
         }
 
         var order = await _ordersRepository.GetByIdAsync(request.Id, cancellationToken);
 
         if (order is null)
-            throw new NullReferenceException("Order not found");
+            return GenericGlovoResult<Order>.Fail("Order was not found", GlovoStatusCodes.NotFound);
 
-        return order;
+        return GenericGlovoResult<Order>.Success(order);
     }
 }

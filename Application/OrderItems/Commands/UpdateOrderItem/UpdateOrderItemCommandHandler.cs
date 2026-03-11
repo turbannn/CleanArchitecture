@@ -2,6 +2,8 @@
 using Application.OrderItems.Commands.DeleteOrderItem;
 using Domain.Entities;
 using Domain.Interfaces;
+using Domain.Results;
+using Domain.Utilities;
 using FluentValidation;
 using MediatR;
 using System;
@@ -10,7 +12,7 @@ using System.Text;
 
 namespace Application.OrderItems.Commands.UpdateOrderItem;
 
-public class UpdateOrderItemCommandHandler : IRequestHandler<UpdateOrderItemCommand>
+public class UpdateOrderItemCommandHandler : IRequestHandler<UpdateOrderItemCommand, GlovoResult>
 {
     private readonly IOrderItemsRepository _orderItemRepository;
     private readonly IValidator<UpdateOrderItemCommand> _validator;
@@ -23,18 +25,24 @@ public class UpdateOrderItemCommandHandler : IRequestHandler<UpdateOrderItemComm
         _mapper = mapper;
     }
 
-    public async Task Handle(UpdateOrderItemCommand request, CancellationToken cancellationToken)
+    public async Task<GlovoResult> Handle(UpdateOrderItemCommand request, CancellationToken cancellationToken)
     {
         var res = await _validator.ValidateAsync(request, cancellationToken);
 
         if (!res.IsValid)
         {
             Console.WriteLine(res.Errors.First());
-            return;
+            return GlovoResult.Fail(res.Errors.First().ErrorMessage, GlovoStatusCodes.BadRequest);
         }
 
         var oi = _mapper.Map(request);
 
-        await _orderItemRepository.UpdateAsync(oi, cancellationToken);
+        var updateRes = await _orderItemRepository.UpdateAsync(oi, cancellationToken);
+
+        if(!updateRes)
+            return GlovoResult.Fail("Internal server error", GlovoStatusCodes.InternalServerError);
+        else
+            return GlovoResult.Success();
+
     }
 }

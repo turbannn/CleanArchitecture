@@ -8,6 +8,7 @@ using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Http.HttpResults;
 using Microsoft.AspNetCore.Routing;
+using Presentation.Extensions;
 using System;
 using System.Collections.Generic;
 using System.Text;
@@ -22,30 +23,32 @@ public class OrderModule : ICarterModule
         {
             var query = new GetOrderByIdQuery(id);
 
-            var order = await sender.Send(query, cancellation);
+            var result = await sender.Send(query, cancellation);
 
-            return order;
+            return result.ToHttpResult();
         });
 
         app.MapPost("/Orders/Create", async (CreateOrderCommand request, ISender sender, CancellationToken cancellation) =>
         {
-            await sender.Send(request, cancellation);
-            return Results.Ok();
+            var result = await sender.Send(request, cancellation);
+
+            return result.ToHttpResult();
         });
 
         app.MapPut("/Orders/Update", async (UpdateOrderCommand request, ISender sender, CancellationToken cancellation) =>
         {
-            await sender.Send(request, cancellation);
-            return Results.Ok();
+            var result =await sender.Send(request, cancellation);
+
+            return result.ToHttpResult();
         });
 
         app.MapDelete("/Orders/DeleteById", async (Guid id, ISender sender, CancellationToken cancellation) =>
         {
             var query = new DeleteOrderCommand(id);
 
-            await sender.Send(query, cancellation);
+            var result = await sender.Send(query, cancellation);
 
-            return Results.Ok();
+            return result.ToHttpResult();
         });
     }
 }

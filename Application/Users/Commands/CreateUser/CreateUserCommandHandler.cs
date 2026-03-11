@@ -1,5 +1,7 @@
 ﻿using Domain.Entities;
 using Domain.Interfaces;
+using Domain.Results;
+using Domain.Utilities;
 using FluentValidation;
 using MediatR;
 using System;
@@ -8,7 +10,7 @@ using System.Text;
 
 namespace Application.Users.Commands.CreateUser;
 
-public class CreateUserCommandHandler : IRequestHandler<CreateUserCommand>
+public class CreateUserCommandHandler : IRequestHandler<CreateUserCommand, GlovoResult>
 {
     private readonly IUsersRepository _repository;
     private readonly IValidator<CreateUserCommand> _validator;
@@ -19,19 +21,24 @@ public class CreateUserCommandHandler : IRequestHandler<CreateUserCommand>
         _validator = validator;
         _mapper = mapper;
     }
-    public async Task Handle(CreateUserCommand request, CancellationToken cancellationToken)
+    public async Task<GlovoResult> Handle(CreateUserCommand request, CancellationToken cancellationToken)
     {
         var res = await _validator.ValidateAsync(request);
 
         if (!res.IsValid)
         {
             Console.WriteLine(res.Errors.First());
-            return;
+            return GlovoResult.Fail(res.Errors.First().ErrorMessage, GlovoStatusCodes.BadRequest);
         }
 
         var user = _mapper.Map(request);
         user.Id = Guid.NewGuid();
 
-        await _repository.AddAsync(user, cancellationToken);
+        var createRes = await _repository.AddAsync(user, cancellationToken);
+
+        if (!createRes)
+            return GlovoResult.Fail("Internal server error", GlovoStatusCodes.InternalServerError);
+        else
+            return GlovoResult.Success();
     }
 }

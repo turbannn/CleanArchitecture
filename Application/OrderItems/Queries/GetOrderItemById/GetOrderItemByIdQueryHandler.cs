@@ -1,6 +1,7 @@
-﻿using Application.OrderItems.Commands.UpdateOrderItem;
-using Domain.Entities;
+﻿using Domain.Entities;
 using Domain.Interfaces;
+using Domain.Results;
+using Domain.Utilities;
 using FluentValidation;
 using MediatR;
 using System;
@@ -9,7 +10,7 @@ using System.Text;
 
 namespace Application.OrderItems.Queries.GetOrderItemById;
 
-public class GetOrderItemByIdQueryHandler : IRequestHandler<GetOrderItemByIdQuery, OrderItem>
+public class GetOrderItemByIdQueryHandler : IRequestHandler<GetOrderItemByIdQuery, GenericGlovoResult<OrderItem>>
 {
     private readonly IOrderItemsRepository _orderItemRepository;
     private readonly IValidator<GetOrderItemByIdQuery> _validator;
@@ -20,23 +21,23 @@ public class GetOrderItemByIdQueryHandler : IRequestHandler<GetOrderItemByIdQuer
         _validator = validator;
     }
 
-    public async Task<OrderItem> Handle(GetOrderItemByIdQuery request, CancellationToken cancellationToken)
+    public async Task<GenericGlovoResult<OrderItem>> Handle(GetOrderItemByIdQuery request, CancellationToken cancellationToken)
     {
         var res = await _validator.ValidateAsync(request, cancellationToken);
 
         if (!res.IsValid)
         {
             Console.WriteLine(res.Errors.First());
-            return new OrderItem { ProductName = "null" };
+            return GenericGlovoResult<OrderItem>.Fail(res.Errors.First().ErrorMessage, GlovoStatusCodes.BadRequest);
         }
 
         var orderItem = await _orderItemRepository.GetByIdAsync(request.Id, cancellationToken);
 
         if (orderItem is null)
         {
-            throw new KeyNotFoundException($"OrderItem with Id {request.Id} was not found.");
+            return GenericGlovoResult<OrderItem>.Fail("Order item was not found", GlovoStatusCodes.NotFound);
         }
 
-        return orderItem;
+        return GenericGlovoResult<OrderItem>.Success(orderItem);
     }
 }
