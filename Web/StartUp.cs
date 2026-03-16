@@ -63,10 +63,10 @@ public class StartUp
         services.AddScoped<IMapper<UpdateUserCommand, User>, GenericMapper<UpdateUserCommand, User>>();
 
         // TEST
-        services.AddMediatR(cfg => cfg.RegisterServicesFromAssembly(typeof(Application.AssemblyRefference).Assembly));
+        services.AddMediatR(cfg => cfg.RegisterServicesFromAssembly(typeof(Application.AssemblyReference).Assembly));
 
         //Validators
-        services.AddValidatorsFromAssembly(typeof(Application.AssemblyRefference).Assembly);
+        services.AddValidatorsFromAssembly(typeof(Application.AssemblyReference).Assembly);
 
         services.AddEndpointsApiExplorer();
         services.AddSwaggerGen();

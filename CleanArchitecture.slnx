@@ -6,5 +6,7 @@
     <Project Path="Presentation/Presentation.csproj" />
     <Project Path="Web/Web.csproj" />
   </Folder>
-  <Folder Name="/test/" />
+  <Folder Name="/test/">
+    <Project Path="ArchitectureTests/Tests.csproj" Id="6b93be0b-c194-4276-bcf0-402e96bf266d" />
+  </Folder>
 </Solution>
