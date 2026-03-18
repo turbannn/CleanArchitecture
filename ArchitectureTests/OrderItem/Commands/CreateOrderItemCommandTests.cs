@@ -3,6 +3,7 @@ using Domain.Entities;
 using Domain.Interfaces;
 using FluentValidation;
 using FluentValidation.Results;
+using Microsoft.Extensions.Logging;
 using Moq;
 using System;
 using System.Collections.Generic;
@@ -16,6 +17,7 @@ public class CreateOrderItemCommandTests
     private readonly Mock<IOrdersRepository> _ordersRepositoryMock;
     private readonly Mock<IValidator<CreateOrderItemCommand>> _createOrderItemCommandValidatorMock;
     private readonly Mock<IMapper<CreateOrderItemCommand, Domain.Entities.OrderItem>> _createOrderItemCommandMapperMock;
+    private readonly Mock<ILogger<CreateOrderItemCommandHandler>> _createOrderItemCommandHandlerLoggerMock;
 
     public CreateOrderItemCommandTests()
     {
@@ -23,6 +25,7 @@ public class CreateOrderItemCommandTests
         _ordersRepositoryMock = new();
         _createOrderItemCommandValidatorMock = new();
         _createOrderItemCommandMapperMock = new();
+        _createOrderItemCommandHandlerLoggerMock = new();
     }
 
     [Test]
@@ -67,7 +70,8 @@ public class CreateOrderItemCommandTests
             _orderItemsRepositoryMock.Object,
             _ordersRepositoryMock.Object,
             _createOrderItemCommandValidatorMock.Object,
-            _createOrderItemCommandMapperMock.Object);
+            _createOrderItemCommandMapperMock.Object, 
+            _createOrderItemCommandHandlerLoggerMock.Object);
 
         // Act
         var result = await handler.Handle(command, CancellationToken.None);

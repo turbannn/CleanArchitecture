@@ -2,6 +2,7 @@
 using Domain.Interfaces;
 using Infrastructure.Data;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Logging;
 using System;
 using System.Collections.Generic;
 using System.Text;
@@ -11,10 +12,12 @@ namespace Infrastructure.Repositories;
 public class UsersRepository : IUsersRepository
 {
     private readonly OrdersDbContext _dbContext;
+    private readonly ILogger<UsersRepository> _logger;
 
-    public UsersRepository(OrdersDbContext dbContext)
+    public UsersRepository(OrdersDbContext dbContext, ILogger<UsersRepository> logger)
     {
         _dbContext = dbContext;
+        _logger = logger;
     }
 
     public async Task<User?> GetByIdAsync(Guid id, CancellationToken cancellationToken)
@@ -38,7 +41,7 @@ public class UsersRepository : IUsersRepository
         }
         catch (Exception ex)
         {
-            // Log the exception (ex) here as needed
+            _logger.LogError(ex, "Failed to add user {UserId}", entityToAdd.Id);
             return false;
         }
     }
@@ -50,12 +53,13 @@ public class UsersRepository : IUsersRepository
             var existingItem = await _dbContext.Users.FindAsync(entityToUpdate.Id, cancellationToken);
             if (existingItem == null)
             {
+                _logger.LogWarning("User {UserId} not found for update", entityToUpdate.Id);
                 return false; // Item not found
             }
         }
         catch (Exception ex)
         {
-            // Log the exception (ex) here as needed
+            _logger.LogError(ex, "Failed to load user {UserId} for update", entityToUpdate.Id);
             return false;
         }
 
@@ -68,7 +72,7 @@ public class UsersRepository : IUsersRepository
         }
         catch (Exception ex)
         {
-            // Log the exception (ex) here as needed
+            _logger.LogError(ex, "Failed to update user {UserId}", entityToUpdate.Id);
             return false;
         }
     }
@@ -82,7 +86,7 @@ public class UsersRepository : IUsersRepository
         }
         catch (Exception ex)
         {
-            // Log the exception (ex) here as needed
+            _logger.LogError(ex, "Failed to delete user {UserId}", id);
             return false;
         }
     }

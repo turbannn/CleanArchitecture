@@ -4,6 +4,7 @@ using Domain.Results;
 using Domain.Utilities;
 using FluentValidation;
 using MediatR;
+using Microsoft.Extensions.Logging;
 using System;
 using System.Collections.Generic;
 using System.Text;
@@ -14,27 +15,35 @@ public class DeleteUserCommandHandler : IRequestHandler<DeleteUserCommand, Glovo
 {
     private readonly IUsersRepository _repository;
     private readonly IValidator<DeleteUserCommand> _validator;
-    public DeleteUserCommandHandler(IUsersRepository repository, IValidator<DeleteUserCommand> validator)
+    private readonly ILogger<DeleteUserCommandHandler> _logger;
+    public DeleteUserCommandHandler(IUsersRepository repository, IValidator<DeleteUserCommand> validator, ILogger<DeleteUserCommandHandler> logger)
     {
         _repository = repository;
         _validator = validator;
+        _logger = logger;
     }
 
     public async Task<GlovoResult> Handle(DeleteUserCommand request, CancellationToken cancellationToken)
     {
-        var res = await _validator.ValidateAsync(request);
+        _logger.LogInformation("Handling DeleteUserCommand for user {UserId}", request.Id);
+        var res = await _validator.ValidateAsync(request, cancellationToken);
 
         if (!res.IsValid)
         {
-            Console.WriteLine(res.Errors.First());
-            return GlovoResult.Fail(res.Errors.First().ErrorMessage, GlovoStatusCodes.BadRequest);
+            var firstError = res.Errors.First();
+            _logger.LogWarning("DeleteUserCommand validation failed for user {UserId}: {Error}", request.Id, firstError.ErrorMessage);
+            return GlovoResult.Fail(firstError.ErrorMessage, GlovoStatusCodes.BadRequest);
         }
 
         var deleteRes = await _repository.DeleteAsync(request.Id, cancellationToken);
 
         if (!deleteRes)
+        {
+            _logger.LogError("Failed to delete user {UserId}", request.Id);
             return GlovoResult.Fail("Internal server error", GlovoStatusCodes.InternalServerError);
-        else
-            return GlovoResult.Success();
+        }
+
+        _logger.LogInformation("User {UserId} deleted successfully", request.Id);
+        return GlovoResult.Success();
     }
 }

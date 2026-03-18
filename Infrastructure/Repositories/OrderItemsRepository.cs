@@ -2,6 +2,7 @@
 using Domain.Interfaces;
 using Infrastructure.Data;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Logging;
 using System;
 using System.Collections.Generic;
 using System.Text;
@@ -11,10 +12,12 @@ namespace Infrastructure.Repositories;
 public class OrderItemsRepository : IOrderItemsRepository
 {
     private readonly OrdersDbContext _ordersDbContext;
+    private readonly ILogger<OrderItemsRepository> _logger;
 
-    public OrderItemsRepository(OrdersDbContext ordersDbContext)
+    public OrderItemsRepository(OrdersDbContext ordersDbContext, ILogger<OrderItemsRepository> logger)
     {
         _ordersDbContext = ordersDbContext;
+        _logger = logger;
     }
 
     public async Task<OrderItem?> GetByIdAsync(Guid id, CancellationToken cancellationToken)
@@ -33,7 +36,7 @@ public class OrderItemsRepository : IOrderItemsRepository
         }
         catch (Exception ex)
         {
-            // Log the exception (ex) here as needed
+            _logger.LogError(ex, "Failed to add order item {OrderItemId}", entityToAdd.Id);
             return false;
         }
     }
@@ -45,12 +48,13 @@ public class OrderItemsRepository : IOrderItemsRepository
             var existingItem = await _ordersDbContext.OrderItems.FindAsync(entityToUpdate.Id, cancellationToken);
             if (existingItem == null)
             {
+                _logger.LogWarning("Order item {OrderItemId} not found for update", entityToUpdate.Id);
                 return false; // Item not found
             }
         }
         catch (Exception ex)
         {
-            // Log the exception (ex) here as needed
+            _logger.LogError(ex, "Failed to load order item {OrderItemId} for update", entityToUpdate.Id);
             return false;
         }
 
@@ -67,7 +71,7 @@ public class OrderItemsRepository : IOrderItemsRepository
         }
         catch (Exception ex)
         {
-            // Log the exception (ex) here as needed
+            _logger.LogError(ex, "Failed to update order item {OrderItemId}", entityToUpdate.Id);
             return false;
         }
     }
@@ -81,7 +85,7 @@ public class OrderItemsRepository : IOrderItemsRepository
         }
         catch (Exception ex)
         {
-            // Log the exception (ex) here as needed
+            _logger.LogError(ex, "Failed to delete order item {OrderItemId}", id);
             return false;
         }
     }

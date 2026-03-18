@@ -2,6 +2,7 @@
 using Domain.Interfaces;
 using Infrastructure.Data;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Logging;
 using System;
 using System.Collections.Generic;
 using System.Text;
@@ -11,9 +12,11 @@ namespace Infrastructure.Repositories;
 public class OrdersRepository : IOrdersRepository
 {
     private readonly OrdersDbContext _ordersDbContext;
-    public OrdersRepository(OrdersDbContext ordersDbContext)
+    private readonly ILogger<OrdersRepository> _logger;
+    public OrdersRepository(OrdersDbContext ordersDbContext, ILogger<OrdersRepository> logger)
     {
         _ordersDbContext = ordersDbContext;
+        _logger = logger;
     }
 
 
@@ -37,7 +40,7 @@ public class OrdersRepository : IOrdersRepository
         }
         catch(Exception ex)
         {
-            // Log the exception (ex) here as needed
+            _logger.LogError(ex, "Failed to add order {OrderId}", entityToAdd.Id);
             return false;
         }
 
@@ -49,12 +52,13 @@ public class OrdersRepository : IOrdersRepository
             var existingItem = await _ordersDbContext.Orders.FindAsync(entityToUpdate.Id, cancellationToken);
             if (existingItem == null)
             {
+                _logger.LogWarning("Order {OrderId} not found for update", entityToUpdate.Id);
                 return false; // Item not found
             }
         }
         catch (Exception ex)
         {
-            // Log the exception (ex) here as needed
+            _logger.LogError(ex, "Failed to load order {OrderId} for update", entityToUpdate.Id);
             return false;
         }
 
@@ -67,7 +71,7 @@ public class OrdersRepository : IOrdersRepository
         }
         catch (Exception ex)
         {
-            // Log the exception (ex) here as needed
+            _logger.LogError(ex, "Failed to update order {OrderId}", entityToUpdate.Id);
             return false;
         }
     }
@@ -80,7 +84,7 @@ public class OrdersRepository : IOrdersRepository
         }
         catch (Exception ex)
         {
-            // Log the exception (ex) here as needed
+            _logger.LogError(ex, "Failed to delete order {OrderId}", id);
             return false;
         }
     }
